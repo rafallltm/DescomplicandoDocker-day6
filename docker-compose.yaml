@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  giropops-senhas:
+    image: rafallltm/giropops-senhas:3.0
+    ports:
+      - "5000:5000"
+    networks:
+      - giropops-network
+    env_file:
+      - .env
+    volumes:
+      - ./strigus:/strigus  
+    depends_on:
+      - redis
+    labels:
+      description: "Giropops"
+    restart: unless-stopped
+    entrypoint: /strigus/entrypoint.sh  
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  redis:
+    image: redis:alpine3.19
+    command: redis-server --appendonly yes --dir /data
+    networks:
+      - giropops-network
+    volumes:
+      - ./data:/data  
+    restart: unless-stopped
+
+networks:
+  giropops-network:
+    driver: bridge
+
